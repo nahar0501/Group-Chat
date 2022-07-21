@@ -37,6 +37,11 @@ dependencies:
   flutter_screenutil: any
   firebase_auth: any
   cloud_firestore: any
+  flutter_bloc: any
+  pin_code_fields: any
+  shared_preferences: any
+  country_code_picker: any
+  firebase_core: any
 
 
 dev_dependencies:
