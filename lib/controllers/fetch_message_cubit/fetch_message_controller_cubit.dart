@@ -24,7 +24,7 @@ class FetchMessageControllerCubit extends Cubit<FetchMessageControllerState> {
 
         for(QueryDocumentSnapshot d in event.docs)
           {
-            var model=MsgModel.fromRawJson(jsonEncode(d.data()));
+            var model=MsgModel(msgid: d.id,msgBody: MsgBody.fromRawJson(jsonEncode(d.data())));
             msgs.add(model);
           }
         msgs=msgs.reversed.toList();
@@ -41,6 +41,19 @@ class FetchMessageControllerCubit extends Cubit<FetchMessageControllerState> {
         {
           emit(FetchMessageErrorState(err:e.message.toString()));
         }
+    }
+  }
+  deleteMessage(String id)async
+  {
+    try{
+      print("deleting");
+      final ref=FirebaseFirestore.instance.collection("chats").doc(id);
+      await ref.delete();
+      print("deleted");
+
+    }catch(e)
+    {
+      print(e.toString());
     }
   }
 }

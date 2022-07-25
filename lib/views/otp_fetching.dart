@@ -94,7 +94,7 @@ class OtpFetching extends StatelessWidget {
                     {
                       Navigator.pop(context);
                       await Prefs.setUserid(state.id);
-                      Navigator.push(context,
+                      Navigator.pushReplacement(context,
                           MaterialPageRoute(builder: (context)=>ChatScreen())
                       );
                     }

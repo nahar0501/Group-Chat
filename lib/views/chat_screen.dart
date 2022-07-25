@@ -3,6 +3,7 @@ import 'package:chat_app/controllers/fetch_message_cubit/fetch_message_controlle
 import 'package:chat_app/controllers/send_message_cubit/send_message_controller_cubit.dart';
 import 'package:chat_app/views/custom_widgets/reciever_ui.dart';
 import 'package:chat_app/views/custom_widgets/sender_ui.dart';
+import 'package:chat_app/views/phone_verification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,20 @@ class ChatScreen extends StatelessWidget {
           "Group Chat",
           style: TextStyle(color: Colors.blue),
         ),
+        actions: [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 10),
+            child: IconButton(
+              onPressed: ()async{
+               await FirebaseAuth.instance.signOut();
+               Navigator.pushReplacement(context,
+                   MaterialPageRoute(builder: (context)=>PhoneVerification())
+               );
+              },
+              icon: Icon(Icons.logout,color: Colors.black,),
+            ),
+          )
+        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -51,12 +66,31 @@ class ChatScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       String myId = FirebaseAuth.instance.currentUser!.uid;
 
-                      if (state.msgs[index].sender == myId) {
-                        return SenderUI(msg: state.msgs[index].msg);
+                      if (state.msgs[index].msgBody.sender == myId) {
+                        return InkWell(
+                          onLongPress: (){
+                            showDialog(context: context, builder: (context)=> AlertDialog(
+                              content:const  SizedBox(
+                                height: 70,
+                                child: Text("Do you want to delet this message"),
+                              ),
+                              actions: [
+                                IconButton(onPressed: (){
+                                  context.read<FetchMessageControllerCubit>().deleteMessage(state.msgs[index].msgid);
+                                  Navigator.pop(context);
+                                }, icon: Icon(Icons.delete)),
+                                IconButton(onPressed: (){
+                                  Navigator.pop(context);
+                                }, icon: Icon(Icons.cancel))
+                              ],
+                            ));
+
+                          },
+                            child: SenderUI(msg: state.msgs[index].msgBody.msg));
                       }
                       return RecieverUI(
-                        ph: state.msgs[index].ph,
-                        msg: state.msgs[index].msg,
+                        ph: state.msgs[index].msgBody.ph,
+                        msg: state.msgs[index].msgBody.msg,
                       );
                     },
                   );
