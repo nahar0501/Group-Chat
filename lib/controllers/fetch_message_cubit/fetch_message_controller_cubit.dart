@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
+import 'package:chat_app/models/ChatRoomModel.dart';
 import 'package:chat_app/models/msg_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:meta/meta.dart';
@@ -9,16 +10,14 @@ import 'package:meta/meta.dart';
 part 'fetch_message_controller_state.dart';
 
 class FetchMessageControllerCubit extends Cubit<FetchMessageControllerState> {
-  FetchMessageControllerCubit() : super(FetchMessageControllerInitial()){
-    fetchMessages();
-  }
-  fetchMessages()async
+  FetchMessageControllerCubit() : super(FetchMessageControllerInitial());
+  fetchMessages(ChatRoomModel chatRoomModel)async
   {
     List<MsgModel> msgs=[];
     print("triggered");
     try{
       emit(FetchMessageLoadingState());
-      final ref=FirebaseFirestore.instance.collection("chats").orderBy("time").snapshots();
+      final ref=FirebaseFirestore.instance.collection("chatrooms").doc(chatRoomModel.id).collection("chat").orderBy("time").snapshots();
       ref.listen((event) {
         msgs.clear();
 

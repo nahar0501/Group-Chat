@@ -42,6 +42,9 @@ dependencies:
   shared_preferences: any
   country_code_picker: any
   firebase_core: any
+  flutter_rating_bar: ^4.0.1
+  image_picker: any
+  firebase_storage: any
 
 
 dev_dependencies:

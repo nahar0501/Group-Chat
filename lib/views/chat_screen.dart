@@ -1,16 +1,32 @@
-import 'package:chat_app/controllers/fetch_message_cubit/fetch_message_controller_cubit.dart';
-import 'package:chat_app/controllers/fetch_message_cubit/fetch_message_controller_cubit.dart';
-import 'package:chat_app/controllers/send_message_cubit/send_message_controller_cubit.dart';
-import 'package:chat_app/views/custom_widgets/reciever_ui.dart';
-import 'package:chat_app/views/custom_widgets/sender_ui.dart';
-import 'package:chat_app/views/phone_verification.dart';
+
+import 'package:chat_app/models/ChatRoomModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class ChatScreen extends StatelessWidget {
+import '../controllers/fetch_message_cubit/fetch_message_controller_cubit.dart';
+import '../controllers/send_message_cubit/send_message_controller_cubit.dart';
+import 'custom_widgets/reciever_ui.dart';
+import 'custom_widgets/sender_ui.dart';
+
+class ChatScreen extends StatefulWidget {
+  ChatRoomModel chatRoomModel;
+  ChatScreen({required this.chatRoomModel});
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
   final txtMsg = TextEditingController();
+
   var msgsCotroller=ScrollController();
+
+  @override
+  void initState(){
+    super.initState();
+    context.read<FetchMessageControllerCubit>().fetchMessages(widget.chatRoomModel);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,24 +36,10 @@ class ChatScreen extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20)
         ),
-        title: const Text(
-          "Group Chat",
+        title:  Text(
+          widget.chatRoomModel.data.name,
           style: TextStyle(color: Colors.blue),
         ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: IconButton(
-              onPressed: ()async{
-               await FirebaseAuth.instance.signOut();
-               Navigator.pushReplacement(context,
-                   MaterialPageRoute(builder: (context)=>PhoneVerification())
-               );
-              },
-              icon: Icon(Icons.logout,color: Colors.black,),
-            ),
-          )
-        ],
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.end,
@@ -89,7 +91,7 @@ class ChatScreen extends StatelessWidget {
                             child: SenderUI(msg: state.msgs[index].msgBody.msg));
                       }
                       return RecieverUI(
-                        ph: state.msgs[index].msgBody.ph,
+                        ph: state.msgs[index].msgBody.name,
                         msg: state.msgs[index].msgBody.msg,
                       );
                     },
@@ -129,6 +131,10 @@ class ChatScreen extends StatelessWidget {
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
+                        prefix: IconButton(
+                          onPressed: (){},
+                          icon: Icon(Icons.image_outlined,color: Colors.grey,),
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                         )),
@@ -155,6 +161,7 @@ class ChatScreen extends StatelessWidget {
                           {
                             context.read<SendMessageControllerCubit>().sendMessage(
                               msg: txtMsg.text,
+                              chatRoomModel: widget.chatRoomModel
                             );
                           }
                       },
