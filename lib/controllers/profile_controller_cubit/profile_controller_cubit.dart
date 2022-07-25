@@ -7,13 +7,15 @@ import '../../shared_prefs/Prefs.dart';
 part 'profile_controller_state.dart';
 
 class ProfileControllerCubit extends Cubit<ProfileControllerState> {
-  ProfileControllerCubit() : super(ProfileControllerInitial()){
-    loadUserData();
-  }
+  ProfileControllerCubit() : super(ProfileControllerInitial());
   loadUserData()async
   {
     emit(ProfileControllerLoading());
     UserModel? data=await Prefs.getUserData();
     emit(ProfileControllerLoaded(userModel: data!));
+  }
+  loadUser(UserModel model)
+  {
+    emit(ProfileControllerLoaded(userModel: model));
   }
 }

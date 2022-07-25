@@ -12,7 +12,7 @@ part 'send_message_controller_state.dart';
 class SendMessageControllerCubit extends Cubit<SendMessageControllerState> {
   SendMessageControllerCubit() : super(InitialState());
 
-  sendMessage({required  String msg,required ChatRoomModel chatRoomModel})async
+  sendMessage({required  String msg,required int type,required ChatRoomModel chatRoomModel})async
   {
     try{
       emit(SendingState());
@@ -23,6 +23,7 @@ class SendMessageControllerCubit extends Cubit<SendMessageControllerState> {
         'sender':mAuth!.uid,
         'name':me!.name,
         'time':DateTime.now().millisecondsSinceEpoch,
+        'type':type
       };
       await FirebaseFirestore.instance.collection("chatrooms").doc(chatRoomModel.id).collection("chat").add(msgBody);
       emit(SentState());

@@ -16,12 +16,14 @@ class MsgBody {
     required this.sender,
     required this.name,
     required this.time,
+    required this.type
   });
 
   String msg;
   String sender;
   String name;
   int time;
+  int type;
 
   factory MsgBody.fromRawJson(String str) => MsgBody.fromJson(json.decode(str));
 
@@ -32,6 +34,7 @@ class MsgBody {
     sender: json["sender"],
     name: json["name"],
     time: json["time"],
+    type: json['type']
   );
 
   Map<String, dynamic> toJson() => {
@@ -39,5 +42,6 @@ class MsgBody {
     "sender": sender,
     "name": name,
     "time": time,
+    "type":type
   };
 }

@@ -3,8 +3,11 @@ import 'dart:io';
 import 'package:chat_app/controllers/ratings_controller/ratings_controller_cubit.dart';
 import 'package:chat_app/controllers/update_profile_controller/update_profile_controller_cubit.dart';
 import 'package:chat_app/views/custom_widgets/custom_auth_loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+import '../models/user_model.dart';
+import '../models/user_model_group.dart';
 import '/controllers/profile_controller_cubit/profile_controller_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -14,7 +17,8 @@ import 'package:image_picker/image_picker.dart';
 import 'custom_widgets/profileTextfield.dart';
 
 class Profile extends StatefulWidget {
-  const Profile({Key? key}) : super(key: key);
+  UserModelGroup? model;
+  Profile(this.model);
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -30,6 +34,14 @@ class _ProfileState extends State<Profile> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    if(widget.model!=null)
+      {
+        context.read<ProfileControllerCubit>().loadUser(UserModel(
+            rated: widget.model!.rated, name: widget.model!.name, pic: widget.model!.pic, id: widget.model!.id, totalpoints: widget.model!.totalpoints, email: widget.model!.email));
+      }
+    else {
+      context.read<ProfileControllerCubit>().loadUserData();
+    }
 
   }
 
@@ -190,43 +202,50 @@ class _ProfileState extends State<Profile> {
                       // TODO: implement listener
                     },
                     builder: (context,st){
-                      return Card(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                                height: 50,
-                                width: double.infinity,
-                                child: Align(
-                                  alignment: Alignment.center,
-                                  child: RatingBar.builder(
-                                    initialRating: 2,
-                                    minRating: 1,
-                                    direction: Axis.horizontal,
-                                    allowHalfRating: true,
-                                    itemCount: 5,
-                                    itemSize: 30,
-                                    itemBuilder: (context, _) => Icon(
-                                      Icons.star,
-                                      color: Colors.amber,
+                      if(st is RatingsControllerLoaded) {
+                        return st.rating==null && FirebaseAuth.instance.currentUser!.uid!=state.userModel.id ?Card(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(
+                                  height: 50,
+                                  width: double.infinity,
+                                  child: Align(
+                                    alignment: Alignment.center,
+                                    child: RatingBar.builder(
+                                      initialRating: 2,
+                                      minRating: 1,
+                                      direction: Axis.horizontal,
+                                      allowHalfRating: true,
+                                      itemCount: 5,
+                                      itemSize: 30,
+                                      itemBuilder: (context, _) =>
+                                          Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                      onRatingUpdate: (rating) {
+                                        ratings = rating;
+                                      },
                                     ),
-                                    onRatingUpdate: (rating) {
-                                      ratings=rating;
-                                    },
-                                  ),
-                                )),
-                            MaterialButton(
-                              color: Colors.blue,
-                              onPressed: () {
-                                context.read<RatingsControllerCubit>().updateRatings(state.userModel, ratings);
-                              },
-                              child: Text(
-                                "Rate coversation",
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            )
-                          ],
-                        ),
+                                  )),
+                              MaterialButton(
+                                color: Colors.blue,
+                                onPressed: () {
+                                  context.read<RatingsControllerCubit>()
+                                      .updateRatings(state.userModel, ratings);
+                                },
+                                child: Text(
+                                  "Rate conversation",
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                              )
+                            ],
+                          ),
+                        ):Container();
+                      }
+                      return const Center(
+                        child: CircularProgressIndicator(),
                       );
                     },
 

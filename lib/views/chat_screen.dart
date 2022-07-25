@@ -1,4 +1,5 @@
 
+import 'package:chat_app/constants/constants.dart';
 import 'package:chat_app/models/ChatRoomModel.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class _ChatScreenState extends State<ChatScreen> {
         ),
         title:  Text(
           widget.chatRoomModel.data.name,
-          style: TextStyle(color: Colors.blue),
+          style: TextStyle(color: Colors.white),
         ),
       ),
       body: Column(
@@ -69,12 +70,33 @@ class _ChatScreenState extends State<ChatScreen> {
                       String myId = FirebaseAuth.instance.currentUser!.uid;
 
                       if (state.msgs[index].msgBody.sender == myId) {
+                        if(state.msgs[index].msgBody.type==1)
+                          {
+                            return Align(
+                              alignment: Alignment.centerRight,
+                              child: Container(
+                                height: 100,
+                                margin: EdgeInsets.all(10),
+                                width: MediaQuery.of(context).size.width*0.4,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.5),
+                                  borderRadius: BorderRadius.circular(10),
+                                  image: DecorationImage(
+                                    image: NetworkImage(
+                                      state.msgs[index].msgBody.msg
+                                    )
+                                  )
+                                ),
+                              ),
+                            );
+                          }
                         return InkWell(
                           onLongPress: (){
                             showDialog(context: context, builder: (context)=> AlertDialog(
                               content:const  SizedBox(
                                 height: 70,
-                                child: Text("Do you want to delet this message"),
+                                child: Text("Do you want to delete this message"),
                               ),
                               actions: [
                                 IconButton(onPressed: (){
@@ -89,6 +111,27 @@ class _ChatScreenState extends State<ChatScreen> {
 
                           },
                             child: SenderUI(msg: state.msgs[index].msgBody.msg));
+                      }
+                      if(state.msgs[index].msgBody.type==1)
+                      {
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            height: 100,
+                            margin: EdgeInsets.all(10),
+                            width: MediaQuery.of(context).size.width*0.4,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                                color: Colors.cyan.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(10),
+                                image: DecorationImage(
+                                    image: NetworkImage(
+                                        state.msgs[index].msgBody.msg
+                                    )
+                                )
+                            ),
+                          ),
+                        );
                       }
                       return RecieverUI(
                         ph: state.msgs[index].msgBody.name,
@@ -107,7 +150,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           Container(
-            height: 60,
+            height: 70,
             margin: EdgeInsets.only(top: 10),
             decoration: BoxDecoration(
               borderRadius: const BorderRadius.only(
@@ -121,7 +164,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 blurRadius: 3,
               )
             ]),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+            padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
@@ -131,9 +174,45 @@ class _ChatScreenState extends State<ChatScreen> {
                     decoration: InputDecoration(
                         contentPadding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
-                        prefix: IconButton(
-                          onPressed: (){},
-                          icon: Icon(Icons.image_outlined,color: Colors.grey,),
+                        prefixIcon: IconButton(
+                          onPressed: (){
+                            showModalBottomSheet(context: context,
+                                builder: (_)=>Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: 10),
+                                  child: GridView.builder(
+                                      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                                          maxCrossAxisExtent: 200,
+                                          childAspectRatio: 3 / 2,
+                                          crossAxisSpacing: 20,
+                                          mainAxisSpacing: 20),
+                                      itemCount: stickers.length,
+                                      itemBuilder: (BuildContext ctx, index) {
+                                        return InkWell(
+                                          onTap: (){
+                                            context.read<SendMessageControllerCubit>().sendMessage(
+                                                msg: stickers[index],
+                                                type: 1,
+                                                chatRoomModel: widget.chatRoomModel
+                                            );
+                                            Navigator.pop(context);
+                                          },
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            decoration: BoxDecoration(
+                                                color: Colors.amber,
+                                                image: DecorationImage(
+                                                  image: AssetImage(
+                                                    app_sticker[index]
+                                                  )
+                                                ),
+                                                borderRadius: BorderRadius.circular(15)),
+                                          ),
+                                        );
+                                      }),
+                                ),
+                            );
+                          },
+                          icon: Icon(Icons.add_circle,color: Colors.black,),
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -161,6 +240,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           {
                             context.read<SendMessageControllerCubit>().sendMessage(
                               msg: txtMsg.text,
+                              type: 0,
                               chatRoomModel: widget.chatRoomModel
                             );
                           }

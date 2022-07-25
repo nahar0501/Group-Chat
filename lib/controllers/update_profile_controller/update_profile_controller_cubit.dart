@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:chat_app/models/user_model.dart';
+import 'package:chat_app/shared_prefs/Prefs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -14,6 +16,7 @@ class UpdateProfileControllerCubit extends Cubit<UpdateProfileControllerState> {
   UpdateProfileControllerCubit() : super(UpdateProfileControllerInitial());
   updateProfile(XFile pic,UserModel model)async{
     try{
+      emit(UpdateProfileControllerLoading());
       final storageRef = FirebaseStorage.instance.ref();
 
 // Create a reference to 'images/mountains.jpg'
@@ -24,10 +27,14 @@ class UpdateProfileControllerCubit extends Cubit<UpdateProfileControllerState> {
           {
             'pic':downloadUrl
           });
+      model.pic=downloadUrl;
+      await Prefs.setUserData(jsonEncode(model.toJson()));
+
+      emit(UpdateProfileControllerLoaded());
 
     }catch(e)
     {
-
+      emit(UpdateProfileControllerError(err: e.toString()));
     }
   }
 }

@@ -2,6 +2,7 @@ import 'package:chat_app/controllers/create_group_chat_controller/create_group_c
 import 'package:chat_app/controllers/fetch_users_controller/fetch_users_controller_cubit.dart';
 import 'package:chat_app/views/all_groups.dart';
 import 'package:chat_app/views/custom_widgets/custom_auth_loading.dart';
+import 'package:chat_app/views/profile.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -15,6 +16,7 @@ class AllUsers extends StatefulWidget {
 }
 
 class _AllUsersState extends State<AllUsers> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,16 +49,28 @@ class _AllUsersState extends State<AllUsers> {
                   return ListView.builder(
                     itemCount: state.users.length,
                     itemBuilder: (context, index) {
+
+                      double ratings=0;
+                      double rators=0;
+                      if(state.users[index].totalpoints>0) {
+                         double total=state.users[index].totalpoints.toDouble();
+                         rators=state.users[index].rated.toDouble();
+                         ratings = total / rators;
+                      }
+
                       return ListTile(
-                        leading: const CircleAvatar(
+                        onTap: (){
+                          Navigator.push(context, MaterialPageRoute(builder: (_)=>Profile(state.users[index])));
+                        },
+                        leading:  CircleAvatar(
                           backgroundImage:
-                          AssetImage("assets/images/invoicebg.jpg"),
+                          NetworkImage(state.users[index].pic),
                         ),
                         title: Text(state.users[index].name),
                         subtitle: Row(
                           children: [
                             RatingBarIndicator(
-                              rating: 2.75,
+                              rating: ratings,
                               itemBuilder: (context, index) =>
                               const Icon(
                                 Icons.star,
@@ -66,8 +80,8 @@ class _AllUsersState extends State<AllUsers> {
                               itemSize: 10.0,
                               direction: Axis.horizontal,
                             ),
-                            const Expanded(
-                              child: Text("(${29.5})"),
+                             Expanded(
+                              child: Text("(${rators})"),
                             )
                           ],
                         ),
