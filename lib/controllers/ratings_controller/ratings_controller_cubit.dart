@@ -21,7 +21,7 @@ class RatingsControllerCubit extends Cubit<RatingsControllerState> {
           .collection("rated")
           .where(FirebaseAuth.instance.currentUser!.uid,isNull: false).snapshots();
       ref.listen((event) {
-        print(event.docs.first.data());
+        print(event.docs);
       });
     } catch (e) {
 
