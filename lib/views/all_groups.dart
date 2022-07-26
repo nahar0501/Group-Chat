@@ -6,11 +6,19 @@ import '../controllers/fetch_all_groups/fetch_all_groups_cubit.dart';
 import 'all_users.dart';
 import 'chat_screen.dart';
 
-class AllGroups extends StatelessWidget {
+class AllGroups extends StatefulWidget {
   const AllGroups({Key? key}) : super(key: key);
 
   @override
+  State<AllGroups> createState() => _AllGroupsState();
+}
+
+class _AllGroupsState extends State<AllGroups> {
+  String _searchText="";
+  final _txtSearch=TextEditingController();
+  @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Groups"),
@@ -23,6 +31,14 @@ class AllGroups extends StatelessWidget {
             color: Colors.blue,
             padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             child: TextField(
+              onChanged: (String value){
+                _searchText=value;
+                print(value);
+                print("changed");
+                setState(() {
+
+                });
+              },
               decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -44,7 +60,7 @@ class AllGroups extends StatelessWidget {
                   return ListView.builder(
                     itemCount: state.model.length,
                     itemBuilder: (context, index) {
-                      return  ListTile(
+                      return state.model[index].data.name.toLowerCase().startsWith(_searchText.toLowerCase())  ? ListTile(
                         onTap: (){
                           Navigator.push(context, MaterialPageRoute(builder: (_)=>ChatScreen(chatRoomModel: state.model[index],)));
                         },
@@ -60,7 +76,7 @@ class AllGroups extends StatelessWidget {
                           "${state.model[index].data.members.length} members",
                           style: TextStyle(fontSize: 10),
                         ),
-                      );
+                      ):const SizedBox();
                     },
                   );
                 }

@@ -16,6 +16,8 @@ class AllUsers extends StatefulWidget {
 }
 
 class _AllUsersState extends State<AllUsers> {
+  String _searchText="";
+  final _txtSearch=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -28,8 +30,14 @@ class _AllUsersState extends State<AllUsers> {
           Container(
             height: 50,
             color: Colors.blue,
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
             child: TextField(
+              onChanged: (String value){
+                _searchText=value;
+                setState(() {
+
+                });
+              },
               decoration: InputDecoration(
                   filled: true,
                   fillColor: Colors.white,
@@ -46,7 +54,7 @@ class _AllUsersState extends State<AllUsers> {
                 FetchUsersControllerState>(
               builder: (context, state) {
                 if (state is FetchUsersControllerLoaded) {
-                  return ListView.builder(
+                  return  ListView.builder(
                     itemCount: state.users.length,
                     itemBuilder: (context, index) {
 
@@ -55,10 +63,10 @@ class _AllUsersState extends State<AllUsers> {
                       if(state.users[index].totalpoints>0) {
                          double total=state.users[index].totalpoints.toDouble();
                          rators=state.users[index].rated.toDouble();
-                         ratings = total / rators;
+                         ratings = (total / rators);
                       }
 
-                      return ListTile(
+                      return state.users[index].name.toLowerCase().startsWith(_searchText.toLowerCase()) ? ListTile(
                         onTap: (){
                           Navigator.push(context, MaterialPageRoute(builder: (_)=>Profile(state.users[index])));
                         },
@@ -81,7 +89,7 @@ class _AllUsersState extends State<AllUsers> {
                               direction: Axis.horizontal,
                             ),
                              Expanded(
-                              child: Text("(${rators})"),
+                              child: Text("(${ratings})"),
                             )
                           ],
                         ),
@@ -94,7 +102,7 @@ class _AllUsersState extends State<AllUsers> {
                             setState(() {});
                           },
                         ),
-                      );
+                      ): const SizedBox();
                     },
                   );
                 }
